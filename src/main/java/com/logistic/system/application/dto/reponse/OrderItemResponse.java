@@ -1,0 +1,29 @@
+package com.logistic.system.application.dto.reponse;
+
+import java.math.BigDecimal;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderItemResponse {
+
+    private Long orderItemId;
+
+    private Long productId;
+
+    private Integer quantity;
+
+    // Giá tại thời điểm mua (Price at purchase)
+    private BigDecimal priceAtPurchase;
+
+    // Thành tiền cho từng item (Thường là quantity * priceAtPurchase)
+    private BigDecimal subTotal;
+
+    private String note;
+}
