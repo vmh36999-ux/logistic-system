@@ -1,4 +1,4 @@
-# Logistic System - Smart Supply Chain Management
+# Logistic System
 
 > Hệ thống Backend hiệu năng cao cho vận hành Logistics, được xây dựng dựa trên nguyên lý Clean Architecture.
 
