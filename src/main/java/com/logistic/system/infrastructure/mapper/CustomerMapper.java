@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import com.logistic.system.application.dto.reponse.CustomerResponse;
+import com.logistic.system.application.dto.response.CustomerResponse;
 import com.logistic.system.domain.model.Customer;
 import com.logistic.system.infrastructure.persistence.entity.CustomerEntity;
 

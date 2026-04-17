@@ -13,8 +13,13 @@ import com.logistic.system.application.dto.request.RegisterRequest;
 import com.logistic.system.application.service.AuthApplicationService;
 import com.logistic.system.infrastructure.security.BlacklistService;
 import com.logistic.system.infrastructure.security.JwtTokenProvider;
-import com.logistic.system.interfaces.dto.request.LoginRequest;
-import com.logistic.system.interfaces.dto.response.AuthResponse;
+import com.logistic.system.application.dto.request.LoginRequest;
+import com.logistic.system.application.dto.response.AuthResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Các API xác thực người dùng (Đăng nhập, Đăng ký, Đăng xuất)")
 public class AuthController {
     @Autowired
     private BlacklistService blacklistService;
@@ -30,18 +36,29 @@ public class AuthController {
     private JwtTokenProvider jwtTokenProvider;
     private final AuthApplicationService authApplicationService;
 
+    @Operation(summary = "Đăng nhập", description = "Xác thực người dùng bằng username/password và trả về JWT token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công"),
+            @ApiResponse(responseCode = "401", description = "Sai thông tin đăng nhập")
+    })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authApplicationService.login(request);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Đăng ký tài khoản", description = "Tạo tài khoản mới cho khách hàng")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Đăng ký thành công"),
+            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ hoặc email/số điện thoại đã tồn tại")
+    })
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authApplicationService.register(request);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Đăng xuất", description = "Vô hiệu hóa token hiện tại bằng cách đưa vào blacklist")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         try {

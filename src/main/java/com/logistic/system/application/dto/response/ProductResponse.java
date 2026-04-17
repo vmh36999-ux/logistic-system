@@ -1,5 +1,7 @@
 package com.logistic.system.application.dto.response;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +16,6 @@ public class ProductResponse {
     private String name;
     private String sku;
     private Double weightGram;
-    private Double price;
-    private Integer stockQuantity;
+    private BigDecimal basePrice;
+    // private Integer stockQuantity;
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.logistic.system.domain.enums.OrderStatus;
 import com.logistic.system.domain.model.Order;
 import com.logistic.system.domain.model.OrderItem;
 
@@ -35,7 +36,12 @@ public class OrderDomainService {
                     return itemTotal;
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Tính phí vậniao hàng
+        BigDecimal shippingFee = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+        // Tính tổng tiền bao gồm phí vậniao hàng
+        total = total.add(shippingFee);
 
+        // Thiết lập tổng giá trị đơn hàng
         order.setTotalAmount(total);
     }
 
@@ -70,5 +76,12 @@ public class OrderDomainService {
                 throw new RuntimeException("Số lượng sản phẩm " + item.getProductId() + " phải lớn hơn 0");
             }
         }
+    }
+
+    public void confirm(Order order) {
+        if (!order.getOrderStatus().equals(OrderStatus.PENDING)) {
+            throw new RuntimeException("Chỉ những đơn hàng đang ở trạng thái xử lý mới có thể xác nhận");
+        }
+        order.setOrderStatus(OrderStatus.CONFIRMED);
     }
 }

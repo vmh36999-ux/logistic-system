@@ -6,13 +6,11 @@ import java.math.RoundingMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.logistic.system.application.dto.reponse.ShipmentResponse;
 import com.logistic.system.application.dto.request.ShipmentRequest;
-import com.logistic.system.domain.enums.Region;
+import com.logistic.system.application.dto.response.ShipmentResponse;
 import com.logistic.system.domain.enums.ShipmentStatus;
 import com.logistic.system.domain.model.Shipment;
 import com.logistic.system.domain.service.ShipmentDomainService;
-import com.logistic.system.domain.service.ShippingFeeDomainService;
 import com.logistic.system.infrastructure.mapper.ShipmentMapper;
 import com.logistic.system.infrastructure.persistence.entity.OrderEntity;
 import com.logistic.system.infrastructure.persistence.entity.ShipmentEntity;
@@ -29,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ShipmentApplicationService {
     private final ShipmentDomainService shipmentDomainService;
-    private final ShippingFeeDomainService shippingFeeDomainService;
     private final ShipmentRepository shipmentRepository;
     private final WarehouseRepository warehouseRepository;
     private final OrderRepository orderRepository;
@@ -49,14 +46,16 @@ public class ShipmentApplicationService {
         // 2. Tính toán (Trọng lượng & Phí)
         BigDecimal totalWeightKg = calculateOrderWeight(order);
 
-        Region sourceReg = Region.fromString(warehouse.getProvince().getRegion());
-        Region destReg = Region.fromString(order.getReceiverProvince().getRegion());
+        // Region sourceReg = Region.fromString(warehouse.getProvince().getRegion());
+        // Region destReg = Region.fromString(order.getReceiverProvince().getRegion());
 
-        BigDecimal fee = shippingFeeDomainService.calculateShippingFee(sourceReg, destReg, totalWeightKg);
+        // BigDecimal fee = shippingFeeDomainService.calculateShippingFee(sourceReg,
+        // destReg, totalWeightKg);
 
-        // 3. CẬP NHẬT ORDER (Phương án 2)
-        order.setShippingFee(fee); // Hết lỗi setShippingFee sau khi làm Bước 1
-        order.setTotalAmount(order.getTotalAmount().add(fee)); // Tổng = Tiền hàng + Phí ship
+        // // 3. CẬP NHẬT ORDER (Phương án 2)
+        // order.setShippingFee(fee); // Hết lỗi setShippingFee sau khi làm Bước 1
+        // order.setTotalAmount(order.getTotalAmount().add(fee)); // Tổng = Tiền hàng +
+        // Phí ship
         orderRepository.save(order);
 
         // 4. LƯU SHIPMENT
@@ -69,16 +68,19 @@ public class ShipmentApplicationService {
         shipment.setReceiverWardId(order.getReceiverWard().getWardId());
         shipment.setReceiverDistrictId(order.getReceiverDistrict().getDistrictId());
         shipment.setTotalWeight(totalWeightKg);
-        shipment.setShippingFee(fee);
-
+        // shipment.setShippingFee(order.getShippingFee());
+        // shipment.setTotalAmount(order.getTotalAmount().add(order.getShippingFee()));
         ShipmentEntity entity = shipmentMapper.toEntity(shipment);
         entity.setOrder(order);
         entity.setCurrentWarehouse(warehouse);
         entity.setTrackingNumber("TK-" + System.currentTimeMillis()); // Đảm bảo không NULL
         entity.setShipmentStatus(ShipmentStatus.PENDING);
 
-        ShipmentEntity saved = shipmentRepository.save(entity);
-        return shipmentMapper.toResponse(shipmentMapper.toDomain(saved));
+        var savedEntity = shipmentRepository.save(entity);
+        // Sau khi shipment được lưu thì thực hiện trừ hàng tồn kho của sản phẩm trong
+        // đơn hàng
+
+        return shipmentMapper.toResponse(shipmentMapper.toDomain(savedEntity));
     }
 
     /**
@@ -121,9 +123,11 @@ public class ShipmentApplicationService {
      */
     @Transactional(readOnly = true)
     public ShipmentResponse getShipment(Long shipmentId) {
+        // Dùng câu lệnh JOIN FETCH để nạp Order ngay lập tức
         ShipmentEntity entity = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy vận đơn!"));
 
+        // Lúc này, entity.getOrder().getTotalAmount() đã có sẵn giá trị
         return shipmentMapper.toResponse(shipmentMapper.toDomain(entity));
     }
 

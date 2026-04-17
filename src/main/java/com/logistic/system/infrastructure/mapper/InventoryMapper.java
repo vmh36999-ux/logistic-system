@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-import com.logistic.system.application.dto.reponse.InventoryResponse;
+import com.logistic.system.application.dto.response.InventoryResponse;
 import com.logistic.system.domain.model.Inventory;
 import com.logistic.system.infrastructure.persistence.entity.InventoryEntity;
 

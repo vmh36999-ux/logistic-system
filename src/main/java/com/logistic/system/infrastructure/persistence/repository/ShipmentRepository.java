@@ -33,4 +33,12 @@ public interface ShipmentRepository extends JpaRepository<ShipmentEntity, Long> 
 
     // Lấy shipment theo warehouse hiện tại
     List<ShipmentEntity> findByCurrentWarehouse_WarehouseId(Long warehouseId);
+
+    /**
+     * Tìm vận đơn kèm theo thông tin chi tiết của đơn hàng (JOIN FETCH).
+     * Giải quyết vấn đề Lazy Loading khi Mapper cần truy cập s.order.totalAmount.
+     */
+    @Query("SELECT s FROM ShipmentEntity s JOIN FETCH s.order WHERE s.order.orderId = :id")
+    Optional<ShipmentEntity> findWithOrderById(@Param("id") Long id);
+
 }

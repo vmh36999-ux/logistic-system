@@ -53,7 +53,7 @@ public class SecurityConfig {
 
                         // Quản lý Sản phẩm
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                        .requestMatchers("/api/products/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/products/**").hasAnyAuthority("ADMIN", "STAFF")
 
                         // Quản lý Đơn hàng
                         .requestMatchers("/api/orders/place").hasAnyAuthority("CUSTOMER", "ADMIN")
@@ -66,6 +66,11 @@ public class SecurityConfig {
                         // Vận đơn & Giao hàng
                         .requestMatchers("/api/delivery/attempts/**").hasAnyAuthority("STAFF", "ADMIN")
                         .requestMatchers("/api/shipments/**").hasAnyAuthority("ADMIN", "STAFF")
+                        .requestMatchers("/api/shipments-tracking/**").hasAnyAuthority("ADMIN", "STAFF")
+                        //
+                        // Cho phép truy cập công khai cho API
+                        .requestMatchers("/api/shipments-items/**").hasAnyAuthority("ADMIN", "STAFF")
+                        //
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",

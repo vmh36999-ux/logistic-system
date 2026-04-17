@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.logistic.system.application.dto.request.InventoryRequest;
-import com.logistic.system.application.dto.reponse.InventoryResponse;
+import com.logistic.system.application.dto.response.InventoryResponse;
 import com.logistic.system.domain.service.InventoryDomainService;
 import com.logistic.system.infrastructure.mapper.InventoryMapper;
 import com.logistic.system.infrastructure.persistence.repository.InventoryRepository;

@@ -13,16 +13,16 @@ import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
-import com.logistic.system.application.dto.reponse.TrackingLogResponse;
+import com.logistic.system.application.dto.response.TrackingLogResponse;
 import com.logistic.system.domain.enums.ShipmentStatus;
-import com.logistic.system.domain.model.ShipmentTrackingLog;
+import com.logistic.system.domain.service.InventoryDomainService;
 import com.logistic.system.domain.service.ShipmentTrackingDomainService;
 import com.logistic.system.infrastructure.mapper.ShipmentMapper;
 import com.logistic.system.infrastructure.persistence.entity.OrderEntity;
 import com.logistic.system.infrastructure.persistence.entity.ShipmentTrackingLogEntity;
 import com.logistic.system.infrastructure.persistence.repository.ShipmentRepository;
 import com.logistic.system.infrastructure.persistence.repository.ShipmentTrackingLogRepository;
-    
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class ShipmentTrackingApplicationService {
     private final ShipmentTrackingDomainService trackingDomainService;
     private final ShipmentMapper shipmentMapper;
     private final EmailApplicationService emailApplicationService;
+    private final InventoryDomainService inventoryDomainService;
 
     @Transactional
     public void updateStatus(Long shipmentId, ShipmentStatus nextStatus, String note, String updatedBy) {
@@ -45,21 +46,16 @@ public class ShipmentTrackingApplicationService {
         trackingDomainService.validateStatusTransition(shipmentEntity.getShipmentStatus(), nextStatus);
 
         // 3. Tạo dữ liệu Log
-        // Mình dùng Builder của Domain Model cho sạch code
-        var domainLog = ShipmentTrackingLog.builder()
+        // Mình dùng Builder của Entity trực tiếp để đảm bảo shipmentId được gán đúng
+        var logEntity = ShipmentTrackingLogEntity.builder()
                 .status(nextStatus)
                 .description(note != null ? note : nextStatus.getLabel())
                 .updatedBy(updatedBy)
-                .location("Trạm trung chuyển") // Sau này Thức có thể lấy từ Request
+                .location("Trạm trung chuyển")
+                .shipment(shipmentEntity)
                 .build();
 
-        // 4. Map sang Entity
-        var logEntity = shipmentMapper.toEntity(domainLog);
-
-        // 5. Liên kết Log với Shipment (Giải quyết gạch đỏ Mapper trước đó)
-        logEntity.setShipment(shipmentEntity);
-
-        // 6. Thực thi lưu trữ song song
+        // 4. Thực thi lưu trữ song song
         trackingLogRepository.save(logEntity); // Ghi lịch sử
 
         shipmentEntity.setShipmentStatus(nextStatus); // Cập nhật trạng thái hiện tại
@@ -67,6 +63,11 @@ public class ShipmentTrackingApplicationService {
         // Nếu là trạng thái đã giao hàng, ghi nhận thời gian thực tế
         if (ShipmentStatus.DELIVERED.equals(nextStatus)) {
             shipmentEntity.setDeliveredAt(LocalDateTime.now());
+        }
+        if (nextStatus.equals(ShipmentStatus.FAILED) || nextStatus.equals(ShipmentStatus.RETURNED)) {
+            shipmentEntity.getOrder().getItems().forEach(item -> {
+                inventoryDomainService.increaseStock(item.getProduct().getProductId(), item.getQuantity());
+            });
         }
 
         shipmentRepository.save(shipmentEntity);
@@ -94,8 +95,9 @@ public class ShipmentTrackingApplicationService {
                         e.getMessage());
             }
         }
-            
+
     }
+
     // Hàm phụ để lọc trạng thái
     private boolean isNotifiableStatus(ShipmentStatus status) {
         return List.of(ShipmentStatus.PICKED_UP,

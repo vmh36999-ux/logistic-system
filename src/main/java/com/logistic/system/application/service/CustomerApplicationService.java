@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.logistic.system.application.dto.request.CustomerRequest;
-import com.logistic.system.application.dto.reponse.CustomerResponse;
+import com.logistic.system.application.dto.response.CustomerResponse;
 import com.logistic.system.domain.model.Customer;
 import com.logistic.system.domain.service.CustomerDomainService;
 import com.logistic.system.infrastructure.mapper.CustomerMapper;

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.logistic.system.domain.enums.OrderStatus;
+import com.logistic.system.domain.enums.PaymentStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -77,6 +78,9 @@ public class OrderEntity {
 
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
+
+    @Column(name = "payment_status", length = 20)
+    private PaymentStatus paymentStatus;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

@@ -19,6 +19,7 @@ public class OrderItem {
     private BigDecimal priceAtPurchase;
     private BigDecimal weightGram;
     private BigDecimal discount;
+    private String productName;
     private BigDecimal subTotal;
     private String note;
 
@@ -85,6 +86,14 @@ public class OrderItem {
 
     public void setSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
     public String getNote() {

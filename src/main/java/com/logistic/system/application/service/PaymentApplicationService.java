@@ -1,6 +1,5 @@
 package com.logistic.system.application.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import com.logistic.system.application.dto.response.PaymentResponse;
 import com.logistic.system.domain.enums.OrderStatus;
 import com.logistic.system.domain.enums.PaymentStatus;
 import com.logistic.system.domain.model.Payment;
+import com.logistic.system.domain.service.InventoryDomainService;
 import com.logistic.system.domain.service.PaymentDomainService;
 import com.logistic.system.infrastructure.mapper.PaymentMapper;
 import com.logistic.system.infrastructure.persistence.entity.OrderEntity;
@@ -32,6 +32,7 @@ public class PaymentApplicationService {
     private final PaymentDomainService paymentDomainService;
     private final OrderRepository orderRepository;
     private final MomoService momoService; // Infrastructure thực hiện gọi API MoMo;
+    private final InventoryDomainService inventoryDomainService; // Domain Service xử lý thao tác kho hàng;
 
     /**
      * Khởi tạo giao dịch thanh toán từ yêu cầu của khách hàng
@@ -98,7 +99,16 @@ public class PaymentApplicationService {
         if (paymentDomain.getPaymentStatus().equals(PaymentStatus.SUCCESS)) {
             entity.setPaidAt(LocalDateTime.now());
             entity.getOrder().setOrderStatus(OrderStatus.PAID);
-            entity.getOrder().setShippingFee(BigDecimal.ZERO);
+            entity.getOrder().setPaymentStatus(PaymentStatus.SUCCESS);
+            // entity.getOrder().setShippingFee(BigDecimal.ZERO);
+            // entity.getOrder().setTotalAmount(BigDecimal.ZERO);
+            if (entity.getOrder().getOrderStatus().equals(OrderStatus.PAID)) {
+                entity.getOrder().getItems().forEach(item -> {
+                    inventoryDomainService.decreaseStock(item.getProduct().getProductId(),
+                            item.getQuantity());
+
+                });
+            }
             log.info("Đơn hàng {} đã thanh toán thành công", entity.getOrder().getOrderId());
         }
 

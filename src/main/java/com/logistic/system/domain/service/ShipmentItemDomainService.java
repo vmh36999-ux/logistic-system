@@ -74,15 +74,16 @@ public class ShipmentItemDomainService {
         return items.stream().allMatch(item -> item.getPackedQuantity() != null &&
                 item.getPackedQuantity().equals(item.getQuantity()));
     }
+
     public void validateQuantity(ShipmentItem item) {
         if (item.getQuantity() == null || item.getQuantity() <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
         }
     }
 
-    public BigDecimal calculateTotalWeight(ShipmentItem item) {
-        if (item.getWeightGram() == null || item.getQuantity() == null)
-            return BigDecimal.ZERO;
-        return item.getWeightGram().multiply(BigDecimal.valueOf(item.getQuantity()));
-    }
+    // public BigDecimal calculateTotalWeight(ShipmentItem item) {
+    // if (item.getWeightGram() == null || item.getQuantity() == null)
+    // return BigDecimal.ZERO;
+    // return item.getWeightGram().multiply(BigDecimal.valueOf(item.getQuantity()));
+    // }
 }

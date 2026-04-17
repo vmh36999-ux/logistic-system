@@ -1,4 +1,4 @@
-package com.logistic.system.application.dto.reponse;
+package com.logistic.system.application.dto.response;
 
 import java.time.LocalDateTime;
 

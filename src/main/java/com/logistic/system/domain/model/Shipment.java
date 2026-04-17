@@ -31,6 +31,7 @@ public class Shipment {
     private BigDecimal shippingFee;
     private ShipmentStatus shipmentStatus;
     private LocalDate expectedDeliveryDate;
+    private BigDecimal totalAmount;
     private LocalDateTime deliveredAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -188,6 +189,14 @@ public class Shipment {
 
     public void setTrackingLogs(List<ShipmentTrackingLog> trackingLogs) {
         this.trackingLogs = trackingLogs;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
 }

@@ -6,8 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.logistic.system.domain.model.Product;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class ProductDomainService {
+
     /**
      * Quy tắc 1: Kiểm tra tính hợp lệ của sản phẩm trước khi đưa vào hệ thống vận
      * hành
@@ -21,6 +25,7 @@ public class ProductDomainService {
             throw new IllegalArgumentException("Sản phẩm phải có giá cơ bản lớn hơn 0");
         }
     }
+
     // /**
     // * Quy tắc 2: Phân loại hàng hóa dựa trên trọng lượng (Dùng cho logic điều
     // phối xe)

@@ -7,11 +7,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.logistic.system.application.dto.reponse.ShipmentItemResponse;
-import com.logistic.system.application.dto.reponse.ShipmentResponse;
-import com.logistic.system.application.dto.reponse.TrackingLogResponse;
 import com.logistic.system.application.dto.request.ShipmentItemRequest;
 import com.logistic.system.application.dto.request.ShipmentRequest;
+import com.logistic.system.application.dto.response.ShipmentItemResponse;
+import com.logistic.system.application.dto.response.ShipmentResponse;
+import com.logistic.system.application.dto.response.TrackingLogResponse;
 import com.logistic.system.domain.model.DeliveryAttempt;
 import com.logistic.system.domain.model.Shipment;
 import com.logistic.system.domain.model.ShipmentItem;
@@ -32,6 +32,8 @@ public interface ShipmentMapper {
     @Mapping(target = "receiverProvinceId", source = "receiverProvince.provinceId")
     @Mapping(target = "receiverDistrictId", source = "receiverDistrict.districtId")
     @Mapping(target = "receiverWardId", source = "receiverWard.wardId")
+    @Mapping(target = "shippingFee", source = "order.shippingFee")
+    @Mapping(target = "totalAmount", source = "order.totalAmount")
     Shipment toDomain(ShipmentEntity entity);
 
     @Mapping(target = "order.orderId", source = "orderId")

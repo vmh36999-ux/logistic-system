@@ -4,14 +4,6 @@ import org.springframework.stereotype.Service;
 
 import com.logistic.system.domain.enums.ShipmentStatus;
 
-// PENDING("Chờ xử lý"),
-// PICKED_UP("Đã lấy hàng"),
-// IN_TRANSIT("Đang vận chuyển"),
-// ARRIVED_AT_WAREHOUSE("Đã đến kho"),
-// OUT_FOR_DELIVERY("Đang đi giao"),
-// DELIVERED("Giao thành công"),
-// FAILED("Giao thất bại"),
-// RETURNED("Đã trả hàng");
 @Service
 public class ShipmentTrackingDomainService {
 
@@ -20,29 +12,34 @@ public class ShipmentTrackingDomainService {
             throw new IllegalArgumentException("Trạng thái mới không được trùng với trạng thái hiện tại.");
         }
 
-        boolean isValid = switch (current) {
-            case PENDING ->
-                next == ShipmentStatus.PICKED_UP || next == ShipmentStatus.FAILED;
-
-            case PICKED_UP ->
-                next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.ARRIVED_AT_WAREHOUSE;
-
-            case IN_TRANSIT ->
-                next == ShipmentStatus.ARRIVED_AT_WAREHOUSE;
-
-            case ARRIVED_AT_WAREHOUSE ->
-                next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.OUT_FOR_DELIVERY;
-
-            case OUT_FOR_DELIVERY ->
-                next == ShipmentStatus.DELIVERED || next == ShipmentStatus.FAILED;
-
-            case FAILED ->
-                next == ShipmentStatus.OUT_FOR_DELIVERY || next == ShipmentStatus.RETURNED;
-
-            case DELIVERED, RETURNED -> false; // Trạng thái cuối, không thể chuyển đi đâu nữa
-
-            default -> false;
-        };
+        boolean isValid = false;
+        switch (current) {
+            case PENDING:
+                isValid = next == ShipmentStatus.PICKED_UP || next == ShipmentStatus.FAILED;
+                break;
+            case PICKED_UP:
+                isValid = next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.ARRIVED_AT_WAREHOUSE;
+                break;
+            case IN_TRANSIT:
+                isValid = next == ShipmentStatus.ARRIVED_AT_WAREHOUSE;
+                break;
+            case ARRIVED_AT_WAREHOUSE:
+                isValid = next == ShipmentStatus.IN_TRANSIT || next == ShipmentStatus.OUT_FOR_DELIVERY;
+                break;
+            case OUT_FOR_DELIVERY:
+                isValid = next == ShipmentStatus.DELIVERED || next == ShipmentStatus.FAILED;
+                break;
+            case FAILED:
+                isValid = next == ShipmentStatus.OUT_FOR_DELIVERY || next == ShipmentStatus.RETURNED;
+                break;
+            case DELIVERED:
+            case RETURNED:
+                isValid = false;
+                break;
+            default:
+                isValid = false;
+                break;
+        }
 
         if (!isValid) {
             throw new IllegalArgumentException("Quy trình không hợp lệ: Không thể chuyển từ "

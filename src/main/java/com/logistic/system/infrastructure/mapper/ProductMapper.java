@@ -4,8 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
-import com.logistic.system.application.dto.reponse.ProductResponse;
 import com.logistic.system.application.dto.request.ProductRequest;
+import com.logistic.system.application.dto.response.ProductResponse;
 import com.logistic.system.domain.model.Product;
 import com.logistic.system.infrastructure.persistence.entity.ProductEntity;
 
@@ -28,4 +28,9 @@ public interface ProductMapper {
     Product toProductRequestDomain(ProductRequest request);
 
     ProductResponse toResponse(Product product);
+
+    /**
+     * Chuyển trực tiếp từ Entity sang Response (Dùng cho Phân trang/Danh sách)
+     */
+    ProductResponse toResponseFromEntity(ProductEntity entity);
 }

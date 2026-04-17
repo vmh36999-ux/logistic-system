@@ -17,4 +17,5 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     // tìm tất cả đơn hàng theo orderCode
     Optional<OrderEntity> findByOrderCode(String orderCode);
+
 }

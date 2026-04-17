@@ -15,6 +15,11 @@ import com.logistic.system.application.dto.request.PaymentRequest;
 import com.logistic.system.application.dto.response.PaymentResponse;
 import com.logistic.system.application.service.PaymentApplicationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,39 +27,31 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Payment Management", description = "Các API xử lý thanh toán qua ví điện tử (MoMo)")
 public class PaymentController {
 
     private final PaymentApplicationService paymentApplicationService;
 
-    /**
-     * Endpoint 1: Tạo yêu cầu thanh toán.
-     * Trả về payUrl để Frontend/Mobile redirect khách sang MoMo.
-     */
+    @Operation(summary = "Tạo thanh toán MoMo", description = "Khởi tạo giao dịch thanh toán và lấy đường dẫn redirect sang MoMo")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tạo yêu cầu thanh toán thành công"),
+            @ApiResponse(responseCode = "400", description = "Đơn hàng không hợp lệ hoặc đã thanh toán")
+    })
     @PostMapping("/momo/create")
-    public ResponseEntity<PaymentResponse> createMomoPayment(@RequestBody PaymentRequest request) {
+    public ResponseEntity<PaymentResponse> createMomoPayment(@Valid @RequestBody PaymentRequest request) {
         log.info(">>> [MOMO CREATE] Bắt đầu tạo thanh toán cho đơn hàng: {}", request.getOrderId());
         PaymentResponse response = paymentApplicationService.createPayment(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Endpoint 2: Redirect URL (Callback)
-     * Đây là nơi MoMo dẫn người dùng quay lại Website/App sau khi thanh toán xong.
-     * Thường là phương thức GET.
-     */
+    @Operation(summary = "Xử lý Redirect từ MoMo", description = "Tiếp nhận người dùng quay lại từ trang thanh toán MoMo")
     @GetMapping("/momo-callback")
     public ResponseEntity<String> handleMomoRedirect(@RequestParam Map<String, String> allParams) {
         log.info(">>> [MOMO REDIRECT] Người dùng quay lại hệ thống với params: {}", allParams);
-        // Ở đây bạn có thể redirect khách hàng về trang "Thanh toán thành công" của
-
         return ResponseEntity.ok("Xác nhận giao dịch thành công. Bạn có thể đóng cửa sổ này.");
     }
 
-    /**
-     * Endpoint 3: Instant Payment Notification (IPN)
-     * MoMo gọi Server-to-Server ngầm qua POST.
-     * Đây là nơi QUAN TRỌNG NHẤT để cập nhật trạng thái đơn hàng vào DB.
-     */
+    @Operation(summary = "Nhận thông báo IPN từ MoMo", description = "API dành riêng cho Server MoMo gọi ngầm để cập nhật trạng thái thanh toán")
     @PostMapping("/momo-ipn")
     public ResponseEntity<Void> handleMomoIPN(@RequestBody MomoCallbackRequest callback) {
         log.info(">>> [MOMO IPN] Nhận thông báo từ Server MoMo cho OrderId: {}, Status: {}",
@@ -62,12 +59,9 @@ public class PaymentController {
 
         try {
             paymentApplicationService.handleCallback(callback);
-            // MoMo yêu cầu phản hồi HTTP 204 hoặc 200 để xác nhận đã nhận được IPN thành
-            // công
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             log.error(">>> [MOMO IPN ERROR] Lỗi xử lý cập nhật đơn hàng: {}", e.getMessage());
-            // Trả về lỗi để MoMo có thể thực hiện retry (nếu cần)
             return ResponseEntity.internalServerError().build();
         }
     }

@@ -25,7 +25,7 @@ public class OrderItemApplicationService {
     public List<OrderItem> getOrderItemById(Long orderItemId) {
         return orderItemRepository.findByOrder_OrderId(orderItemId)
                 .stream()
-                .map(orderMapper::toDomain)
+                .map(orderMapper::toDomainFromItemEntity)
                 .collect(Collectors.toList());
     }
 
@@ -34,8 +34,8 @@ public class OrderItemApplicationService {
         // Validate nghiệp vụ trước khi lưu
         orderItemDomainService.validate(orderItem);
 
-        var entity = orderMapper.toEntity(orderItem);
+        var entity = orderMapper.toEntityFromItem(orderItem);
         var saved = orderItemRepository.save(entity);
-        return orderMapper.toDomain(saved);
+        return orderMapper.toDomainFromItemEntity(saved);
     }
 }

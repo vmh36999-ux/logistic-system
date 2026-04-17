@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemResponse {
-
-    private Long orderItemId;
-
+    // private Long orderId;
     private Long productId;
 
     // Thêm các thông tin hiển thị (thường lấy từ Domain sau khi map từ Entity)

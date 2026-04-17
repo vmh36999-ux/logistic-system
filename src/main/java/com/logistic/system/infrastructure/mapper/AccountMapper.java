@@ -2,7 +2,7 @@ package com.logistic.system.infrastructure.mapper;
 
 import com.logistic.system.domain.model.Account;
 import com.logistic.system.infrastructure.persistence.entity.AccountEntity;
-import com.logistic.system.interfaces.dto.response.AuthResponse;
+import com.logistic.system.application.dto.response.AuthResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
