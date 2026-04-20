@@ -79,7 +79,7 @@ Các thao tác quan trọng (như `placeOrder` hoặc `cancelOrder`) được ba
   "password": "securepassword"
 }
 ```
-
+đính kèm ảnh: <img width="380" height="162" alt="Screenshot 2026-04-20 231445" src="https://github.com/user-attachments/assets/8fbf5b53-4dda-454b-86a7-b5c10275b7e4" />
 **Response:**
 
 ```json
