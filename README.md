@@ -63,7 +63,7 @@ Các thao tác quan trọng (như `placeOrder` hoặc `cancelOrder`) được ba
 
 - **Xác thực**: Phiên làm việc stateless dựa trên JWT.
 - **Thu hồi Token (Revocation)**: Vì JWT không thể bị vô hiệu hóa một cách tự nhiên, tôi đã triển khai **Redis Blacklist**. Khi đăng xuất, token sẽ được lưu vào Redis với thời gian sống (TTL) khớp với thời gian hết hạn của nó, ngăn chặn việc tái sử dụng.
-- **Phân quyền dựa trên vai trò **: Kiểm soát chi tiết quyền hạn cho `ADMIN`, `STAFF` và `CUSTOMER`.
+- Phân quyền dựa trên vai trò: Kiểm soát chi tiết quyền hạn cho `ADMIN`, `STAFF` và `CUSTOMER`.
 
 ***
 
