@@ -29,4 +29,8 @@ public interface DeliveryAttemptRepository extends JpaRepository<DeliveryAttempt
      * Tìm các lần giao hàng theo trạng thái (ví dụ: FAILED, DELIVERED).
      */
     List<DeliveryAttemptEntity> findByStatus(String status);
+
+    // đếm số lần giao hàng thành công của một vận đơn
+    Long countByStatusAndShipment_ShipmentId(String status, Long shipmentId);
+
 }

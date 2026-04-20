@@ -3,6 +3,7 @@ package com.logistic.system.infrastructure.persistence.entity;
 import java.time.LocalDateTime;
 
 import com.logistic.system.domain.enums.DeliveryStatus;
+import com.logistic.system.domain.enums.FailureReason;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,7 +54,7 @@ public class DeliveryAttemptEntity {
 
     @Builder.Default
     @Column(name = "attempt_number")
-    private Integer attemptNumber = 1;
+    private Integer attemptNumber = 11;
 
     @Builder.Default
     @Column(name = "delivered_quantity")
@@ -67,8 +68,9 @@ public class DeliveryAttemptEntity {
     @Column(length = 20)
     private DeliveryStatus status;
 
-    @Column(length = 255)
-    private String reason;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private FailureReason reason;
 
     @Column(name = "image_proof_url", length = 500)
     private String imageProofUrl;

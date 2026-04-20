@@ -47,10 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register").permitAll()
                         // logout - Cho phép permitAll để tránh lỗi 403 khi token hết hạn
                         .requestMatchers("/api/auth/logout").permitAll()
-
                         // Cho phép truy cập công khai cho Auth API
                         .requestMatchers("/api/auth/**").permitAll()
-
                         // Quản lý Sản phẩm
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/products/**").hasAnyAuthority("ADMIN", "STAFF")
@@ -70,7 +68,9 @@ public class SecurityConfig {
                         //
                         // Cho phép truy cập công khai cho API
                         .requestMatchers("/api/shipments-items/**").hasAnyAuthority("ADMIN", "STAFF")
-                        //
+                        // Cho phép truy cập công khai cho API
+                        .requestMatchers("/api/v1/delivery/**").hasAnyAuthority("STAFF", "ADMIN")
+                        .requestMatchers("/api/v1/delivery/record-attempt").hasAnyAuthority("STAFF", "ADMIN")
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",

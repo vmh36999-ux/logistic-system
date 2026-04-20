@@ -54,6 +54,7 @@ public class OrderApplicationService {
         private final ShippingFeeDomainService shippingFeeDomainService;
         private final MomoService momoService;
         private final InventoryDomainService inventoryDomainService;
+        private final ShipmentApplicationService shipmentApplicationService;
 
         @Transactional // Rất quan trọng: Đảm bảo nếu lưu OrderItem lỗi thì Order cũng không được tạo
         public OrderResponse placeOrder(Long accountId, OrderRequest request) {
@@ -192,15 +193,17 @@ public class OrderApplicationService {
                                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng!"));
 
                 Order orderDomain = orderMapper.toDomainFromEntity(entity);
-
+                // tự động trừ kho khi đơn hàng đang ở trạng thái xác nhận
                 if (newStatus.equals(OrderStatus.CONFIRMED)) {
                         orderDomainService.confirm(orderDomain);
                         // 3. Thực hiện trừ kho
                         orderDomain.getItems().forEach(item -> {
                                 inventoryDomainService.decreaseStock(item.getProductId(), item.getQuantity());
                         });
+                        // 4. Tự động kích đoạt tọa vận đơn
                 }
-
+                // tự động tạo Shipment và ShipmentItem khi đơn hàng chuyển sang trạng thái xác
+                // nhận
                 entity.setOrderStatus(newStatus);
                 orderRepository.save(entity);
         }

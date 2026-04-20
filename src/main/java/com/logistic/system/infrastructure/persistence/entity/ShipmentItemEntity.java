@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.logistic.system.domain.enums.ShipmentItemStatus;
 
 @Entity
 @Table(name = "shipment_items", indexes = {
@@ -49,6 +52,10 @@ public class ShipmentItemEntity {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ShipmentItemStatus status = ShipmentItemStatus.PENDING;
 
     @Builder.Default
     @Column(name = "picked_quantity")

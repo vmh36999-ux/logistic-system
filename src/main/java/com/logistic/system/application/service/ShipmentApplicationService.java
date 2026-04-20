@@ -75,7 +75,6 @@ public class ShipmentApplicationService {
         entity.setCurrentWarehouse(warehouse);
         entity.setTrackingNumber("TK-" + System.currentTimeMillis()); // Đảm bảo không NULL
         entity.setShipmentStatus(ShipmentStatus.PENDING);
-
         var savedEntity = shipmentRepository.save(entity);
         // Sau khi shipment được lưu thì thực hiện trừ hàng tồn kho của sản phẩm trong
         // đơn hàng

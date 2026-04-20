@@ -1,5 +1,6 @@
 package com.logistic.system.infrastructure.persistence.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,6 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
+
+    List<AccountEntity> findByStatus(String status);
 }

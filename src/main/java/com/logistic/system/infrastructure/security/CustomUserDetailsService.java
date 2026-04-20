@@ -29,7 +29,20 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> accountRepository.findByPhone(emailOrPhone))
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Không tìm thấy tài khoản với email hoặc số điện thoại: " + emailOrPhone));
+        // Kiểm tra trạng thái tài khoản chặn logic đăng nhập
+        // switch (account.getStatus()) {
+        // case PENDING_APPROVAL -> throw new DisabledException("Tài khoản đang chờ quản
+        // trị phê duyệt");
+        // case REJECTED -> throw new DisabledException("Yêu cầu đăng ký tài khoản của
+        // bạn đã bị từ chối");
+        // case LOCKED -> throw new LockedException("Tài khoản của bạn đã bị khóa");
+        // case INACTIVE -> throw new DisabledException("Tài khoản của bạn đã ngừnd hoạt
+        // động");
+        // case ACTIVE -> {
+        // }
 
+        // }
+        // active tiệp tục xử lý
         return new User(
                 account.getEmail() != null ? account.getEmail() : account.getPhone(),
                 account.getPasswordHash(),

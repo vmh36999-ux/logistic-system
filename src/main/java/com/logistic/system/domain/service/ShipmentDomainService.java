@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,10 @@ public class ShipmentDomainService {
         map.put(ShipmentStatus.FAILED, List.of(ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.RETURNED));
 
         ALLOWED_TRANSITIONS = Collections.unmodifiableMap(map);
+    }
+
+    public String generateShipmentItemId(String ordercode) {
+        return "SHP-" + ordercode + "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
     }
 
     /**

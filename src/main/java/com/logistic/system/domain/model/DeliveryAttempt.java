@@ -1,8 +1,13 @@
 package com.logistic.system.domain.model;
 
-import com.logistic.system.domain.enums.DeliveryStatus;
-import lombok.*;
 import java.time.LocalDateTime;
+
+import com.logistic.system.domain.enums.DeliveryStatus;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -20,8 +25,8 @@ public class DeliveryAttempt {
     private String reason;
     private String imageProofUrl;
     private String signatureUrl;
-    private Double gpsLatitude;
-    private Double gpsLongitude;
+    // private Double gpsLatitude;
+    // private Double gpsLongitude;
     private LocalDateTime expectedTime;
     private LocalDateTime attemptTime;
     private String note;

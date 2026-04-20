@@ -17,3 +17,7 @@ public enum ShipmentStatus {
 
     private final String label;
 }
+// SUCCESS("Giao thành công"),
+// FAILED("Giao thất bại"),
+// RETRY("Giao lại"),
+// CANCELLED("Hủy giao");

@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
+import com.logistic.system.application.dto.request.DeliveryAttemptRequest;
 import com.logistic.system.application.dto.request.ShipmentItemRequest;
 import com.logistic.system.application.dto.request.ShipmentRequest;
 import com.logistic.system.application.dto.response.ShipmentItemResponse;
@@ -69,30 +70,20 @@ public interface ShipmentMapper {
 
     // ShipmentItem
     @Mapping(target = "shipmentId", source = "shipment.shipmentId")
-    @Mapping(target = "orderItemId", source = "orderItem.orderItemId")
-    @Mapping(source = "orderItem.product.weightGram", target = "weightGram")
-    ShipmentItem toDomain(ShipmentItemEntity entity);
 
-    @Mapping(target = "shipment.shipmentId", source = "shipmentId")
-    @Mapping(target = "orderItem.orderItemId", source = "orderItemId")
-    @Mapping(target = "orderItem.product.weightGram", source = "weightGram")
-    @Mapping(source = "productId", target = "productId")
-    ShipmentItemEntity toEntity(ShipmentItem domain);
+    ShipmentItem toShipmentItemDomain(ShipmentItemEntity entity);
 
-    @Mapping(target = "shipmentItemId", ignore = true)
-    @Mapping(target = "shipment.shipmentId", source = "shipmentId")
     @Mapping(target = "orderItem.orderItemId", source = "orderItemId")
-    @Mapping(source = "productId", target = "productId")
+    @Mapping(target = "orderItem.product.productId", source = "productId")
+    @Mapping(target = "shipment.shipmentId", source = "shipmentId")
+    ShipmentItemEntity toShipmentItemEntity(ShipmentItem domain);
+
+    // @Mapping(target = "shipmentItemId", ignore = true)
+    // @Mapping(target = "shipment.shipmentId", source = "shipmentId")
+    // @Mapping(target = "orderItem.orderItemId", source = "orderItemId")
+    // @Mapping(source = "productId", target = "productId")
     void updateShipmentItemEntityFromDomain(ShipmentItem domain, @MappingTarget ShipmentItemEntity entity);
 
-    @Mapping(target = "shipmentItemId", ignore = true)
-    @Mapping(target = "pickedQuantity", ignore = true)
-    @Mapping(target = "pickedAt", ignore = true)
-    @Mapping(target = "packedQuantity", ignore = true)
-    @Mapping(target = "packedAt", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "weightGram", ignore = true)
     ShipmentItem toShipmentItemDomain(ShipmentItemRequest request);
 
     ShipmentItemResponse toShipmentItemResponse(ShipmentItem domain);
@@ -120,6 +111,10 @@ public interface ShipmentMapper {
     @Mapping(target = "shipmentItem.shipmentItemId", source = "shipmentItemId")
     @Mapping(target = "staff.staffId", source = "staffId")
     DeliveryAttemptEntity toEntity(DeliveryAttempt domain);
+
+    // DTO Mappings
+
+    DeliveryAttempt toDomain(DeliveryAttemptRequest request);
 
     // ShippingFee
     @Mapping(target = "fromProvinceId", source = "fromProvince.provinceId")

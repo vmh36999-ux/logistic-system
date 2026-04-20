@@ -26,7 +26,6 @@ public class DataInitializer implements CommandLineRunner {
     // Inject giá trị từ file properties
     @Value("${app.admin.email}")
     private String adminEmail;
-
     @Value("${app.admin.password}")
     private String adminPassword;
 

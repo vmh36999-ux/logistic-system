@@ -12,7 +12,4 @@ import lombok.NoArgsConstructor;
 public class ShipmentItemRequest {
     private Long shipmentId;
     private Long orderItemId;
-    private Long productId;
-    private Integer quantity;
-    private String note;
 }
