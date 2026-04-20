@@ -90,7 +90,7 @@ Các thao tác quan trọng (như `placeOrder` hoặc `cancelOrder`) được ba
   "role": "ADMIN"
 }
 ```
-
+<img width="861" height="142" alt="image" src="https://github.com/user-attachments/assets/c0421c02-5a15-4190-aac4-163246262448" />
 ***
 
 ## 💻 Cài đặt và Khởi chạy
