@@ -53,10 +53,6 @@ Khác với các triển khai thông thường trừ kho ngay khi tạo đơn, h
 - MapStruct xử lý chuyển đổi tại thời điểm biên dịch (compile-time) để không gây ảnh hưởng đến hiệu năng khi chạy (zero runtime overhead).
 - Domain models luôn "sạch" và dễ dàng viết unit test mà không cần các annotation của JPA.
 
-### 3. Tính Toàn vẹn của Giao dịch (Transaction Integrity)
-
-Các thao tác quan trọng (như `placeOrder` hoặc `cancelOrder`) được bao bọc trong `@Transactional`. Điều này đảm bảo rằng nếu cập nhật thanh toán thất bại sau khi đổi kho, toàn bộ thao tác sẽ được rollback, giữ cho hệ thống luôn ở trạng thái nhất quán.
-
 ***
 
 ## 🔒 Triển khai Bảo mật
