@@ -1,8 +1,12 @@
 package com.logistic.system.domain.model;
 
-import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -10,11 +14,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Staff {
     private Long staffId;
-    private Long accountId;
+    private Account account;
     private String code;
     private String firstName;
     private String lastName;
-    private Long warehouseId;
+    private Warehouse warehouse;
     private String address;
     private LocalDate birthDate;
     private LocalDate startDate;

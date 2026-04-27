@@ -23,12 +23,9 @@ public interface UserWarehouseMapper {
     WarehouseEntity toEntity(Warehouse domain);
 
     // Staff
-    @Mapping(target = "accountId", source = "account.accountId")
-    @Mapping(target = "warehouseId", source = "warehouse.warehouseId")
+
     Staff toDomain(StaffEntity entity);
 
-    @Mapping(target = "account.accountId", source = "accountId")
-    @Mapping(target = "warehouse.warehouseId", source = "warehouseId")
     StaffEntity toEntity(Staff domain);
 
 }

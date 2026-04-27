@@ -46,6 +46,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authApplicationService.login(request);
+
         return ResponseEntity.ok(response);
     }
 
@@ -88,4 +89,5 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Đăng xuất không thành công!");
         }
     }
+
 }

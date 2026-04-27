@@ -1,7 +1,10 @@
 package com.logistic.system.application.service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,11 +25,9 @@ import com.logistic.system.infrastructure.mapper.AccountMapper;
 import com.logistic.system.infrastructure.persistence.entity.AccountEntity;
 import com.logistic.system.infrastructure.persistence.entity.StaffEntity;
 import com.logistic.system.infrastructure.persistence.repository.AccountRepository;
-import com.logistic.system.infrastructure.persistence.repository.DistrictRepository;
-import com.logistic.system.infrastructure.persistence.repository.ProvinceRepository;
 import com.logistic.system.infrastructure.persistence.repository.StaffRepository;
-import com.logistic.system.infrastructure.persistence.repository.WardRepository;
 import com.logistic.system.infrastructure.security.JwtTokenProvider;
+import com.logistic.system.infrastructure.service.TokenService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,11 +40,10 @@ public class StaffAuthApplicationService {
         private final JwtTokenProvider tokenProvider;
         private final AccountRepository accountRepository;
         private final StaffRepository staffRepository;
-        private final ProvinceRepository provinceRepository;
-        private final DistrictRepository districtRepository;
-        private final WardRepository wardRepository;
         private final AccountMapper accountMapper;
         private final PasswordEncoder passwordEncoder;
+        private final TokenService tokenService;
+        private final StringRedisTemplate stringRedisTemplate;
 
         /**
          * Use case: xử lý login
@@ -57,10 +57,6 @@ public class StaffAuthApplicationService {
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                        // Bước 2: Sinh JWT token
-                        String jwt = tokenProvider.generateToken(authentication);
-
-                        // Bước 3: Lấy thông tin user
                         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
                         // Repository trả về AccountEntity
@@ -68,12 +64,40 @@ public class StaffAuthApplicationService {
                                         .or(() -> accountRepository.findByPhone(userDetails.getUsername()))
                                         .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin tài khoản"));
 
+                        Long accountId = accountEntity.getAccountId();
+                        // chặn
+                        if (Boolean.TRUE.equals(
+                                        stringRedisTemplate.hasKey("BLOCK:" + accountId))) {
+                                throw new RuntimeException("Tài khoản đã bị khóa");
+                        }
+                        // tạo token mới
+                        String jti = UUID.randomUUID().toString();
+                        String accessToken = tokenProvider.generateToken(authentication, jti);
+                        long ttl = tokenProvider.getRemainingTime(accessToken);
+                        // 2. lấy session cũ từ Redis
+                        String oldJti = stringRedisTemplate.opsForValue().get("ActiveJti:" + accountId);
+
+                        if (oldJti != null) {
+                                tokenService.addToBlacklist(oldJti, ttl);
+                        }
+
+                        // 3. lưu session mới
+                        stringRedisTemplate.opsForValue().set(
+                                        "ActiveJti:" + accountId,
+                                        jti,
+                                        ttl,
+                                        TimeUnit.MILLISECONDS);
+
+                        // 4. refresh token qua service
+                        String refreshToken = tokenService.createRefreshToken(accountId);
+
                         // Mapper chuyển sang domain model
                         Account account = accountMapper.toDomain(accountEntity);
 
                         // Bước 5: Trả về AuthResponse
                         return AuthResponse.builder()
-                                        .accessToken(jwt)
+                                        .accessToken(accessToken)
+                                        .refreshToken(refreshToken)
                                         .username(userDetails.getUsername())
                                         .role(account.getRole().name())
                                         .tokenType("Bearer")
@@ -95,6 +119,7 @@ public class StaffAuthApplicationService {
                 if (accountRepository.existsByPhone(request.getPhone())) {
                         throw new RuntimeException("Số điện thoại đã tồn tại");
                 }
+                // Kiểm tra warehouse có thật không (Chặn data ảo)
 
                 // 2. Tạo AccountEntity
                 AccountEntity accountEntity = AccountEntity.builder()
@@ -110,7 +135,6 @@ public class StaffAuthApplicationService {
                 // 3. Tạo StaffEntity
                 StaffEntity staffEntity = StaffEntity.builder()
                                 .account(accountEntity)
-                                .code("STAFF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                                 .firstName(request.getFirstName())
                                 .lastName(request.getLastName())
                                 .birthDate(request.getBirthDate())
@@ -132,4 +156,50 @@ public class StaffAuthApplicationService {
 
                 return login(loginRequest);
         }
+
+        /**
+         * Use case: xử lý refresh token
+         */
+        public AuthResponse refresh(String refreshToken) {
+
+                String userId = stringRedisTemplate.opsForValue()
+                                .get("RT:" + refreshToken);
+
+                if (userId == null) {
+                        throw new RuntimeException("Refresh token invalid");
+                }
+
+                if (Boolean.TRUE.equals(
+                                stringRedisTemplate.hasKey("BLOCK:" + userId))) {
+                        throw new RuntimeException("User blocked");
+                }
+
+                Long id = Long.parseLong(userId);
+
+                AccountEntity account = accountRepository.findById(id)
+                                .orElseThrow();
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                account.getEmail(),
+                                null,
+                                List.of());
+
+                String jti = UUID.randomUUID().toString();
+                String newAccessToken = tokenProvider.generateToken(authentication, jti);
+
+                long ttl = tokenProvider.getRemainingTime(newAccessToken);
+
+                // overwrite session (1 device)
+                stringRedisTemplate.opsForValue().set(
+                                "ActiveSession:" + userId,
+                                newAccessToken,
+                                ttl,
+                                TimeUnit.MILLISECONDS);
+
+                return AuthResponse.builder()
+                                .accessToken(newAccessToken)
+                                .refreshToken(refreshToken)
+                                .build();
+        }
+
 }

@@ -41,6 +41,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // admin
+                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/api/accounts/**").hasAuthority("ADMIN")
+
                         // đăng nhập
                         .requestMatchers("/api/auth/login").permitAll()
                         // đăng ký

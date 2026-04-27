@@ -1,7 +1,9 @@
 package com.logistic.system.application.service;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +29,7 @@ import com.logistic.system.infrastructure.persistence.repository.DistrictReposit
 import com.logistic.system.infrastructure.persistence.repository.ProvinceRepository;
 import com.logistic.system.infrastructure.persistence.repository.WardRepository;
 import com.logistic.system.infrastructure.security.JwtTokenProvider;
+import com.logistic.system.infrastructure.service.TokenService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +46,8 @@ public class AuthApplicationService {
         private final WardRepository wardRepository;
         private final AccountMapper accountMapper;
         private final PasswordEncoder passwordEncoder;
+        private final TokenService tokenService;
+        private final StringRedisTemplate stringRedisTemplate;
 
         /**
          * Use case: xử lý login
@@ -56,10 +61,6 @@ public class AuthApplicationService {
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                        // Bước 2: Sinh JWT token
-                        String jwt = tokenProvider.generateToken(authentication);
-
-                        // Bước 3: Lấy thông tin user
                         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
                         // Repository trả về AccountEntity
@@ -67,12 +68,40 @@ public class AuthApplicationService {
                                         .or(() -> accountRepository.findByPhone(userDetails.getUsername()))
                                         .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin tài khoản"));
 
+                        Long accountId = accountEntity.getAccountId();
+                        // chặn
+                        if (Boolean.TRUE.equals(
+                                        stringRedisTemplate.hasKey("BLOCK:" + accountId))) {
+                                throw new RuntimeException("Tài khoản đã bị khóa");
+                        }
+                        // tạo token mới
+                        String jti = UUID.randomUUID().toString();
+                        String accessToken = tokenProvider.generateToken(authentication, jti);
+                        long ttl = tokenProvider.getRemainingTime(accessToken);
+                        // 2. lấy session cũ từ Redis
+                        String oldJti = stringRedisTemplate.opsForValue().get("ActiveJti:" + accountId);
+
+                        if (oldJti != null) {
+                                tokenService.addToBlacklist(oldJti, ttl);
+                        }
+
+                        // 3. lưu session mới
+                        stringRedisTemplate.opsForValue().set(
+                                        "ActiveJti:" + accountId,
+                                        jti,
+                                        ttl,
+                                        TimeUnit.MILLISECONDS);
+
+                        // 4. refresh token qua service
+                        String refreshToken = tokenService.createRefreshToken(accountId);
+
                         // Mapper chuyển sang domain model
                         Account account = accountMapper.toDomain(accountEntity);
 
                         // Bước 5: Trả về AuthResponse
                         return AuthResponse.builder()
-                                        .accessToken(jwt)
+                                        .accessToken(accessToken)
+                                        .refreshToken(refreshToken)
                                         .username(userDetails.getUsername())
                                         .role(account.getRole().name())
                                         .tokenType("Bearer")
@@ -133,4 +162,5 @@ public class AuthApplicationService {
 
                 return login(loginRequest);
         }
+
 }
